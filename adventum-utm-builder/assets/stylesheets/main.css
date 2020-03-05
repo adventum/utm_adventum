@@ -1,0 +1,28 @@
+.btn-group .btn{
+  cursor: pointer;
+}
+
+.bd-clipboard{
+  position: relative;
+  float: right;
+  display: block;
+}
+
+.btn-clipboard{
+  position: absolute;
+  top: 2rem;
+  right: .5rem;
+  z-index: 10;
+  display: block;
+  padding: .25rem .5rem;
+  font-size: 75%;
+  color: grey;
+  background-color: transparent;
+  border: 0;
+  border-radius: .25rem;
+}
+
+.btn-clipboard:hover{
+  color: white;
+  background-color: #027de7;
+}

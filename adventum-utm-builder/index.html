@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=no,width=device-width" />
+    <title>Генератор UTM-меток</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.11/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.11/dist/css/select2.min.css">
+    <link rel="stylesheet" href="assets/stylesheets/select2.bootstrap.min.css">
+    <link rel="stylesheet" href="assets/stylesheets/main.css">
+    <script src="assets/js/linked-fields.js"></script>
+    <script src="assets/js/translit.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/bitly.js"></script>
+    <script src="assets/js/sendGoogleDocs.js"></script>
+    <script src="assets/js/generate.js"></script>
+    <script src="assets/js/parse.js"></script>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PSXKBRF');</script>
+    <!-- End Google Tag Manager -->
+
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PSXKBRF"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img src="assets/images/adventum-logo.jpeg" width="30" height="30" class="d-inline-block align-top" alt="">
+        Генератор UTM-меток
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.notion.so/dd4fb01e32b74365b0a10fc22d4e2deb" target="_blank">Инструкция</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.notion.so/FAQ-ad72602b78844644aedaecb4bd006b21" target="_blank">FAQ</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12 pt-3">
+          <div class="btn-group btn-group-lg btn-group-toggle" id="mode" data-toggle="buttons" aria-label="Режим">
+            <label class="btn btn-secondary active">
+              <input type="radio" name="options" id="btn_generate_campaign" value="generate_campaign" autocomplete="off" checked>Уровень кампании
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="btn_generate_adgroup" value="generate_adgroup" autocomplete="off">Уровень группы объявлений
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="btn_parse" value="parse" autocomplete="off">Парсинг
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-5 col-sm-12 p-3 leftpane">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="client-name">Клиент: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите клиента из списка. Если нужного клиента в списке нет, воспользуйтесь инструкцией в FAQ">[?]</a></label>
+              <select class="form-control" id="client_name" placeholder=""></select>
+            </div>
+            <div class="col-md-6">
+              <label for="product-name">Продукт: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите продукт клиента из списка. Если нужного продукта в списке нет, воспользуйтесь инструкцией в FAQ">[?]</a></label>
+              <select class="form-control" id="product_name" placeholder=""></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="campaign_name" id = 'label_campaign_name'>Введите название кампании: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Здесь нужно ввести <u>человекопонятное</u> название кампании на русском языке. Оно будет автоматически переведено на латиницу.">[?]</a></label>
+            <input class="form-control" type="text" id="campaign_name" placeholder="">
+          </div>
+          <div class="form-group form_group_adgroup_name">
+            <label for="adgroup_name" id = 'label_adgroup_name'>Введите название группы объявлений: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Здесь нужно ввести <u>человекопонятное</u> название группы объявлений на русском языке. Оно будет автоматически переведено на латиницу.">[?]</a></label>
+            <input class="form-control" type="text" id="adgroup_name" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="website_link">Ссылка на рекламируемую страницу: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Здесь нужно ввести URL посадочной страницы. В ссылке не должно быть UTM-меток">[?]</a></label>
+            <input class="form-control" type="text" id="website_link" placeholder="">
+          </div>
+          <div class="form-group">
+            <input class="" type="checkbox" id="https" placeholder="">&nbsp
+            <label for="https">Протокол HTTPS <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Если отмечен чекбокс, генерируется ссылка по протоколу https://. Если не отмечен - по протоколу http://">[?]</a></label>
+          </div>
+          <div class="form-group">
+            <label for="source">Выберите Source: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите источник из списка. Для ввода медйиной площадки вручную выберите пункт 'Прямая закупка'">[?]</a></label>
+            <select class="form-control" id="source" placeholder="">
+              <option value="yandex_search">Яндекс.Директ (поиск)</option>
+              <option value="yandex_network">Яндекс.Директ (сети)</option>
+              <option value="yandex_media">Яндекс.Директ (медийные кампании)</option>
+              <option value="google_search">Google Ads (поиск)</option>
+              <option value="google_network">Google Ads (сети)</option>
+              <option value="dv360">Display & Video 360</option>
+              <option value="dv360_dcm">Display & Video 360 (DCM)</option>
+              <option value="yandex_display">Яндекс Дисплей</option>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="facebook-instagram">Facebook + Instagram</option>
+              <option value="vk">VK</option>
+              <option value="mytarget">MyTarget</option>
+              <option value="telegram">Telegram</option>
+              <option value="getintent">Getintent</option>
+              <option value="getintent_dcm">Getintent (DCM)</option>
+              <option value="beeline">Beeline</option>
+              <option value="soloway">Soloway</option>
+              <option value="segmento">Segmento</option>
+              <option value="criteo">Criteo</option>
+              <option value="sociomantic">Sociomantic</option>
+              <option value="email">Email</option>
+              <option value="nativeroll">NativeRoll</option>
+              <option value="yandex_navigator">Яндекс Навигатор</option>
+              <option value="yandex_maps">Яндекс Карты</option>
+              <option value="2gis">2ГИС</option>
+              <option value="sms">СМС-рассылка</option>
+              <option value="youtube">Youtube</option>
+              <option value="direct_buying">Прямая закупка</option>
+              <option value="yandex_market">Яндекс.Маркет</option>
+            </select>
+          </div>
+          <div class="form-group placement">
+            <label for="placement">Название площадки (utm_source): <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Введите метку UTM-source для медийной площадки">[?]</a></label>
+            <input class="form-control" type="text" id="placement" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="medium">Выберите Medium: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите способ закупки из списка">[?]</a></label>
+            <select class="form-control" id="medium" placeholder="">
+              <option value="cpc">Оплата за клик (cpc)</option>
+              <option value="cpm">Оплата за показы (cpm)</option>
+              <option value="cpa">Оплата за действия (cpa)</option>
+              <option value="email">Email</option>
+              <option value="cpl">Оплата за лиды (cpl)</option>
+              <option value="social-promo">Продвижение в соцсетях (social-promo)</option>
+              <option value="cpv">Видео (за просмотры / cpv)</option>
+              <option value="cpf">Оплата за подписчика (cpf)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="geo">Выберите гео: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите геотаргетинг из списка">[?]</a></label>
+            <select class="form-control" id="geo" placeholder="">
+              <optgroup label="Страны">
+                <option value="ru">Россия</option>
+                <option value="by">Беларусь</option>
+                <option value="kz">Казахстан</option>
+                <option value="ua">Украина</option>
+              </optgroup>
+              <optgroup label="Стандартные гео">
+                <option value="mmo">Москва и область</option>
+                <option value="spblo">Санкт-Петербург и область</option>
+                <option value="rf_mir">Россия и мир</option>
+                <option value="mir">Мир</option>
+                <option value="rf_nommo">РФ (кроме Москва и область)</option>
+                <option value="rf_nomspb">РФ (кроме Москва и Санкт-Петербург)</option>
+              </optgroup>
+              <optgroup label="Федеральные округа РФ">
+                <option value="rf_szfo">Северо-Западный федеральный округ</option>
+                <option value="rf_yufo">Южный федеральный округ</option>
+                <option value="rf_skfo">Северо-Кавказский федеральный округ</option>
+                <option value="rf_ufo">Уральский федеральный округ</option>
+                <option value="rf_sfo">Сибирский федеральный округ</option>
+                <option value="rf_cfo">Центральный федеральный округ</option>
+                <option value="rf_pfo">Приволжский федеральный округ</option>
+                <option value="rf_dfo">Дальневосточный федеральный округ</option>
+              </optgroup>
+              <optgroup label="Области, республики, края">
+                <option value='altayskiy_kray'>Алтайский край</option>
+                <option value='amurskaya_obl'>Амурская область</option>
+                <option value='arhangelskaya_obl'>Архангельская область</option>
+                <option value='astrahanskaya_obl'>Астраханская область</option>
+                <option value='belgorodskaya_obl'>Белгородская область</option>
+                <option value='bryanskaya_obl'>Брянская область</option>
+                <option value='vladimirskaya_obl'>Владимирская область</option>
+                <option value='volgogradskaya_obl'>Волгоградская область</option>
+                <option value='vologodskaya_obl'>Вологодская область</option>
+                <option value='voronezhskaya_obl'>Воронежская область</option>
+                <option value='evreyskaya_ao'>Еврейская автономная область</option>
+                <option value='zabaykalskiy_kray'>Забайкальский край</option>
+                <option value='ivanovskaya_obl'>Ивановская область</option>
+                <option value='irkutskaya_obl'>Иркутская область</option>
+                <option value='kabardino_balkariya'>Кабардино-Балкарская Республика</option>
+                <option value='kaliningradskaya_obl'>Калининградская область</option>
+                <option value='kaluzhskaya_obl'>Калужская область</option>
+                <option value='kamchatskiy_kray'>Камчатский край</option>
+                <option value='karachaevo_cherkessiya'>Карачаево-Черкесская Республика</option>
+                <option value='kemerovskaya_obl'>Кемеровская область</option>
+                <option value='kirovskaya_obl'>Кировская область</option>
+                <option value='kostromskaya_obl'>Костромская область</option>
+                <option value='krasnodarskiy_kray'>Краснодарский край</option>
+                <option value='krasnoyarskiy_kray'>Красноярский край</option>
+                <option value='kurganskaya_obl'>Курганская область</option>
+                <option value='kurskaya_obl'>Курская область</option>
+                <option value="len_obl">Ленинградская область</option>
+                <option value='lipetskaya_obl'>Липецкая область</option>
+                <option value='magadanskaya_obl'>Магаданская область</option>
+                <option value="mo">Московская область</option>
+                <option value='murmanskaya_obl'>Мурманская область</option>
+                <option value='nenetskiy_ao'>Ненецкий автономный округ</option>
+                <option value='nizhegorodskaya_obl'>Нижегородская область</option>
+                <option value='novgorodskaya_obl'>Новгородская область</option>
+                <option value='novosibirskaya_obl'>Новосибирская область</option>
+                <option value='omskaya_obl'>Омская область</option>
+                <option value='orenburgskaya_obl'>Оренбургская область</option>
+                <option value='orlovskaya_obl'>Орловская область</option>
+                <option value='penzenskaya_obl'>Пензенская область</option>
+                <option value='permskiy_kray'>Пермский край</option>
+                <option value='primorskiy_kray'>Приморский край</option>
+                <option value='pskovskaya_obl'>Псковская область</option>
+                <option value='adygeya'>Республика Адыгея (Адыгея)</option>
+                <option value='altay'>Республика Алтай</option>
+                <option value='bashkortostan'>Республика Башкортостан</option>
+                <option value='buryatiya'>Республика Бурятия</option>
+                <option value='dagestan'>Республика Дагестан</option>
+                <option value='ingushetiya'>Республика Ингушетия</option>
+                <option value='kalmykiya'>Республика Калмыкия</option>
+                <option value='kareliya'>Республика Карелия</option>
+                <option value='komi'>Республика Коми</option>
+                <option value='krym'>Республика Крым</option>
+                <option value='mariy_el'>Республика Марий Эл</option>
+                <option value='mordoviya'>Республика Мордовия</option>
+                <option value='yakitiya'>Республика Саха (Якутия)</option>
+                <option value='sev_osetiya'>Республика Северная Осетия - Алания</option>
+                <option value='tatarstan'>Республика Татарстан (Татарстан)</option>
+                <option value='tyva'>Республика Тыва</option>
+                <option value='hakasiya'>Республика Хакасия</option>
+                <option value='rostovskaya_obl'>Ростовская область</option>
+                <option value='ryazanskaya_obl'>Рязанская область</option>
+                <option value='samarskaya_obl'>Самарская область</option>
+                <option value='saratovskaya_obl'>Саратовская область</option>
+                <option value='sahalinskaya_obl'>Сахалинская область</option>
+                <option value='sverdlovskaya_obl'>Свердловская область</option>
+                <option value='sevastopol'>Севастополь</option>
+                <option value='smolenskaya_obl'>Смоленская область</option>
+                <option value='stavropolskiy_kray'>Ставропольский край</option>
+                <option value='tambovskaya_obl'>Тамбовская область</option>
+                <option value='tverskaya_obl'>Тверская область</option>
+                <option value='tomskaya_obl'>Томская область</option>
+                <option value='tulskaya_obl'>Тульская область</option>
+                <option value='tyumenskaya_obl'>Тюменская область</option>
+                <option value='udmurtskaya_obl'>Удмуртская Республика</option>
+                <option value='ulyanovskaya_obl'>Ульяновская область</option>
+                <option value='habarovskiy_kray'>Хабаровский край</option>
+                <option value='hanty_mansiyskiy_ao'>Ханты-Мансийский автономный округ - Югра</option>
+                <option value='chelyabinskaya_obl'>Челябинская область</option>
+                <option value='chechnya'>Чеченская Республика</option>
+                <option value='chuvashiya'>Чувашская Республика - Чувашия</option>
+                <option value='chukotskiy_ao'>Чукотский автономный округ</option>
+                <option value='yamalo_nenetskiy_ao'>Ямало-Ненецкий автономный округ</option>
+                <option value='yaroslavskaya_obl'>Ярославская область</option>
+              </optgroup>
+              <optgroup label="Города РФ">
+                <option value="msk">Москва</option>
+                <option value="spb">Санкт-Петербург</option>
+                <option value="novosibirsk">Новосибирск</option>
+                <option value="ekaterinburg">Екатеринбург</option>
+                <option value="nizhniy_novgorod">Нижний Новгород</option>
+                <option value="kazan">Казань</option>
+                <option value="chelyabinsk">Челябинск</option>
+                <option value="omsk">Омск</option>
+                <option value="samara">Самара</option>
+                <option value="ufa">Уфа</option>
+                <option value="krasnoyarsk">Красноярск</option>
+                <option value="perm">Пермь</option>
+                <option value="voronezh">Воронеж</option>
+                <option value="volgograd">Волгоград</option>
+                <option value="krasnodar">Краснодар</option>
+                <option value="rostov">Ростов-на-Дону</option>
+                <option value="snezhinsk">Снежинск</option>
+                <option value="narofominsk">Наро-Фоминск</option>
+                <option value="reutov">Реутов</option>
+                <option value="izhevsk">Ижевск</option>
+                <option value="roslavl">Рославль</option>
+                <option value="zarechniy">Заречный</option>
+                <option value="volgodonsk">Волгодонск</option>
+                <option value="kasimov">Касимов</option>
+                <option value="nizhniy_tagil">Нижний Тагил</option>
+                <option value="ivanovo">Иваново</option>
+                <option value="kostroma">Кострома</option>
+                <option value="obninsk">Обнинск</option>
+                <option value="kemerovo">Кемерово</option>
+                <option value="sochi">Сочи</option>
+                <option value="magnitogorsk">Магнитогорск</option>
+              </optgroup>
+              <optgroup label="Для НТВ-Плюс">
+                <option value="rf_zapad">РФ - Запад</option>
+                <option value="rf_vostok">РФ - Восток + ДВ</option>
+              </optgroup>
+              <optgroup label="Другие страны">
+                <option value="US">США</option>
+                <option value="UK">Великобритания</option>
+                <option value="SW">Швейцария</option>
+                <option value="FR">Франция</option>
+                <option value="CA">Канада</option>
+                <option value="NE">Нидерланды</option>
+                <option value="SWE">Швеция</option>
+                <option value="IT">Италия</option>
+                <option value="DE">Дания</option>
+                <option value="HK">Гонконг</option>
+                <option value="NO">Норвегия</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <input class="" type="checkbox" id="supergeo" placeholder="">&nbsp
+            <label for="supergeo">Супергео <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Отметьте чекбокс, если используется гиперлокальный геотаргетинг">[?]</a></label>
+          </div>
+          <div class="form-group">
+            <label for="target_type">Выберите способ таргетирования: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите способ задания таргетинга в кампании">[?]</a></label>
+            <select class="form-control" id="target_type" placeholder="">
+              <option value="static">Статичное размещение</option>
+              <option value="keywords">Поисковые запросы</option>
+              <option value="social_groups">Группы в соцсетях</option>
+              <option value="remarketing">Ремаркетинг и базы</option>
+              <option value="look_a_like">Look-a-like</option>
+              <option value="supergeo">Супергео</option>
+              <option value="builtin_audience">Встроенная аудитория</option>
+              <option value="nokeywords">Автотаргетинг</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="audience">Выберите аудитории: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите аудиторию, на которую вы таргетируетесь">[?]</a></label>
+            <select class="form-control" id="audience" placeholder="">
+              <option value=""></option>
+              <option value="general">Общая аудитория</option>
+              <option value="thematic">Тематические запросы</option>
+              <option value="product">Продукт</option>
+              <option value="brand">Бренд </option>
+              <option value="brand_product">Бренд + Продукт</option>
+              <option value="competitors">Конкуренты</option>
+              <option value="site_visit">Визит на сайт</option>
+              <option value="call_to_company">Звонок в компанию</option>
+              <option value="call_to_competitors">Звонок конкурентам</option>
+              <option value="video_watch">Просмотр видео</option>
+              <option value="autotargeting">Автотаргетинг</option>
+              <option value="social_groups">Группы в соцсетях</option>
+              <option value="bloggers">Блогеры</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ad_format">Выберите формат рекламы: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Выберите формат рекламного объявления">[?]</a></label>
+            <select class="form-control" id="ad_format" placeholder="">
+              <option value="0">Не задан</option>
+            </select>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="age_from">Возраст от: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Если задан таргетинг по возрасту, укажите нижнюю границу возраста">[?]</a></label>
+              <input class="form-control" type="number" id="age_from" placeholder="">
+            </div>
+            <div class="col-md-4">
+              <label for="age_to">Возраст до: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Если задан таргетинг по возрасту, укажите верхнюю границу возраста">[?]</a></label>
+              <input class="form-control" type="number" id="age_to" placeholder="">
+            </div>
+            <div class="col-md-4">
+              <label for="sex">Пол: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Если задан таргетинг по полу, укажите пол">[?]</a></label>
+              <select class="form-control" id="sex" placeholder="">
+                <option value="na">Не задан</option>
+                <option value="m">Муж.</option>
+                <option value="w">Жен.</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="add_link">Введите идентификатор доп. ссылки: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Заполните это поле, если генерируется URL для быстрой ссылки в контексте. Это добавит в ссылку метку вида #метка, для того, чтобы сделать все быстрые ссылки уникальными и пройти модерацию. Идентификатор может принимать любое значение, оно автоматически будет переведено в латиницу">[?]</a></label>
+            <input class="form-control" type="text" id="add_link" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="ab_test">Выберите вариант теста: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Заполните это поле, если проводится A/B-тестирование. Идентификатор может принимать любое значение, оно автоматически будет переведено в латиницу">[?]</a></label>
+            <input class="form-control" type="text" id="ab_test" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="comment">Введите комментарий: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="В этом поле можно ввести дополнительные параметры, которые будут передаваться в отчет. Например, временной таргетинг, или детальное описание таргетинга или аудитории. Можно ввести любое значение, оно автоматически будет переведено в латиницу">[?]</a></label>
+            <input class="form-control" type="text" id="comment" placeholder="">
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <input class="" type="checkbox" id="desktop" placeholder="">&nbsp
+              <label for="desktop">Десктоп <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Отметьте этот чекбокс, если используется таргетинг на десктоп">[?]</a></label>
+            </div>
+            <div class="col-md-6">
+              <input class="" type="checkbox" id="mobile" placeholder="">&nbsp
+              <label for="mobile">Мобайл <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Отметьте этот чекбокс, если используется таргетинг на мобильные устройства">[?]</a></label>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <input class="" type="checkbox" id="shortlink" placeholder="">&nbsp
+              <label for="shortlink">Короткая ссылка <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Отметьте этот чекбокс, если необходимо сгенерировать короткую ссылку">[?]</a></label> &nbsp
+            </div>
+            <div class="col-md-6">
+              <input class="" type="checkbox" id="qr" placeholder="">&nbsp
+              <label for="qr">QR-код <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Отметьте этот чекбокс, если необходимо сгенерировать QR-код">[?]</a></label> &nbsp
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 offset-md-1 col-sm-12 p-3">
+          <div class="row">
+            <div class="col-sm-12 rightpane">
+              <div class="form-group form_group_campaign_name">
+                <div class="bd-clipboard">
+                  <button id="btn-clipboard-fullname" type="button" class="btn-clipboard" title="" data-original-title="Copy to clipboard">Скопировать</button>
+                </div>
+                <label id="label_campaign_name_result" for="campaign_name_result">Полное название кампании:<a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Название кампании нужно скопировать в название кампании в рекламном кабинете">[?]</a></label>
+                <textarea class="form-control" id="campaign_name_result" rows="3" readonly></textarea>
+                <small id="campaign_name_count" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group form_group_adgroup_name">
+                <div class="bd-clipboard">
+                  <button id="btn-clipboard-fulladgroupname" type="button" class="btn-clipboard" title="" data-original-title="Copy to clipboard">Скопировать</button>
+                </div>
+                <label id="label_adgroup_name_result" for="adgroup_name_result">Полное название группы объявлений: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Название группы объявлений нужно скопировать в название группы объявлений в рекламном кабинете">[?]</a></label>
+                <textarea class="form-control" id="adgroup_name_result" rows="3" readonly></textarea>
+                <small id="adgroup_name_count" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group form_group_utm">
+                <div class="bd-clipboard">
+                  <button id="btn-clipboard-UTM" type="button" class="btn-clipboard" title="" data-original-title="Copy to clipboard">Скопировать</button>
+                </div>
+                <label for="utm_result">UTM-метка: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Это финальная ссылка для вставки в рекламное объявление">[?]</a></label>
+                <textarea class="form-control" id="utm_result" rows="8" readonly></textarea>
+                <small id="utm_result_count" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group form_group_calltracking_name">
+                <div class="bd-clipboard">
+                  <button id="btn-clipboard-calltracking" type="button" class="btn-clipboard" title="" data-original-title="Copy to clipboard">Скопировать</button>
+                </div>
+                <label for="calltracking_name_result">Название кампании в CoMagic / CallTouch: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Название кампании нужно скопировать в название кампании в системе коллтрекинга">[?]</a></label>
+                <textarea class="form-control" id="calltracking_name_result" rows="3" readonly></textarea>
+                <small id="calltracking_name_count" class="form-text text-muted"></small>
+              </div>
+              <div class="form-group form_group_shortlink">
+                <div class="bd-clipboard">
+                  <button id="btn-clipboard-shortlink" type="button" class="btn-clipboard" title="" data-original-title="Copy to clipboard">Скопировать</button>
+                </div>
+                <label for="shortlink_result">Короткая ссылка: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Короткая ссылка содержит в себе все вшитые параметры">[?]</a></label>
+                <textarea class="form-control" id="shortlink_result" rows="1" readonly></textarea>
+              </div>
+              <div class="form-group qr">
+
+              </div>
+              <div class="form-group form_group_hash" id="hash_result" style="display: none;">
+                <label for="hash_result">Уникальный код: <a href="#" data-toggle="tooltip" data-placement="top" data-html="true" title="Введите здесь уникальный код после знака тильды (~) для парсинга настроек кампании / группы объявлений">[?]</a></label>
+                <textarea class="form-control" id="hash" rows="1"></textarea>
+              </div>
+              <div class="form-group" id="start_button">
+                <button type="button" class="btn btn-primary btn-lg btn-block" name="button" id="btn_start">Сгенерировать</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="bg-secondary p-3">
+      <span class="col-sm-2 text-light">
+        Версия 2.10
+      </span>
+      <span class="col-sm-2 text-light ">
+        <a href="changelog" class="text-light">Changelog</a>
+      </span>
+    </footer>
+  </body>
+</html>
