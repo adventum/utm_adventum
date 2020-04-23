@@ -99,7 +99,8 @@ $(document).ready(function() {
       'Билборды', //15
       'SMS', //16
       'True View', //17
-      'Эксклюзив' //18
+      'Эксклюзив', //18
+      'Мультиформат' //19
     ],
     [
       'smart_banners',
@@ -120,7 +121,8 @@ $(document).ready(function() {
       'billboards',
       'sms',
       'true_view',
-      'exclusive'
+      'exclusive',
+      'multiformat'
     ]
   ];
 
@@ -229,6 +231,9 @@ $(document).ready(function() {
       case 'yandex_market':
         allowed_medium = [0,2];
         break;
+      case 'firstdata':
+        allowed_medium = [0,1];
+        break;
     };
     $('#medium').find('option').remove().end();
     for (var i = 0; i < allowed_medium.length; i++) {
@@ -331,6 +336,9 @@ $(document).ready(function() {
       case 'yandex_market':
         allowed_targeting = [0];
         break;
+      case 'firstdata':
+        allowed_targeting = [6];
+        break;
     };
     $('#target_type').find('option').remove().end();
     for (var i = 0; i < allowed_targeting.length; i++) {
@@ -432,6 +440,9 @@ $(document).ready(function() {
         break;
       case 'yandex_market':
         allowed_adformat = [3];
+        break;
+      case 'firstdata':
+        allowed_adformat = [5,6,7,19];
         break;
     };
     $('#ad_format').find('option').remove().end();
