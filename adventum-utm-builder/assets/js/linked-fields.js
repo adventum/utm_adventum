@@ -62,7 +62,8 @@ $(document).ready(function() {
       'Автотаргетинг',//7
       'Интересы',//8
       'Категории',//9
-      'Блогеры' //10
+      'Блогеры', //10
+	  'Базы' //11
     ],
     [
       'static',
@@ -75,7 +76,8 @@ $(document).ready(function() {
       'nokeywords',
       'interests',
       'categories',
-      'bloggers'
+      'bloggers',
+	  'base'
     ]
   ];
 
@@ -100,7 +102,8 @@ $(document).ready(function() {
       'SMS', //16
       'True View', //17
       'Эксклюзив', //18
-      'Мультиформат' //19
+      'Мультиформат', //19
+	   'Рассылка' //20
     ],
     [
       'smart_banners',
@@ -122,7 +125,8 @@ $(document).ready(function() {
       'sms',
       'true_view',
       'exclusive',
-      'multiformat'
+      'multiformat',
+	  'rassylka'
     ]
   ];
 
@@ -310,7 +314,7 @@ $(document).ready(function() {
         allowed_targeting = [3];
         break;
       case 'email':
-        allowed_targeting = [0,3,4,6];
+        allowed_targeting = [0,3,4,6,11];
         break;
       case 'nativeroll':
         allowed_targeting = [6];
@@ -415,7 +419,7 @@ $(document).ready(function() {
         allowed_adformat = [7];
         break;
       case 'email':
-        allowed_adformat = [2,3,5,6,7,8,9,11];
+        allowed_adformat = [2,3,5,6,7,8,9,11,20];
         break;
       case 'nativeroll':
         allowed_adformat = [2];
